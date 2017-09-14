@@ -43,9 +43,11 @@ module.exports = {
     },
 
     logIncommingMessage(activity) {
+        console.log(JSON.stringify(activity ? activity : {}));
         dashbot.logIncoming({
             text: JSON.stringify(activity ? activity : {}),
-            timestamp: Date.now()});
+            timestamp: Date.now()
+        });
     },
 
     sendMessagesFromDashbot(client, conversationId, message) {
@@ -62,7 +64,10 @@ module.exports = {
                     }
                 }
             })
-            .then(() => dashbot.logOutgoing({ text: message, timestamp: Date.now() }))
+            .then(() => { 
+                console.log(message);
+                dashbot.logOutgoing({ text: message, timestamp: Date.now() });
+             })
             .catch((err) => console.error('Error sending message:', err));
     },
 
