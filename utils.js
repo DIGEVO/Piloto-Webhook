@@ -38,5 +38,7 @@ module.exports = {
         body.apiKey = body.apiKey || null;
 
         directline.connectBot(JSON.stringify({ body: JSON.stringify(body) }), response);
+
+        response.end();
     }
 };

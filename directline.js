@@ -73,7 +73,7 @@ module.exports = {
         const conversationId = result.obj.conversationId;
         await module.exports.sendMessagesFromDashbot(directLineClient, conversationId, message);
         await module.exports.logIncommingMessage(directLineClient, conversationId);
-        response.end();
+        //response.end();
     },
 
     logIncommingMessage: async (directLineClient, conversationId) => {
