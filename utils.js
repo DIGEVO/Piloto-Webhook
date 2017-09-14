@@ -18,7 +18,7 @@ module.exports = {
             request
                 .on('error', module.exports.handleError)
                 .on('data', (chunk) => body.push(chunk))
-                .on('end', () => { module.exports.handleResponse(Buffer.concat(body).toString(), response)});
+                .on('end', () => { module.exports.handleResponse(Buffer.concat(body).toString(), response) });
         } else {
             response.statusCode = 404;
             response.end();
@@ -37,20 +37,6 @@ module.exports = {
         body.text = body.text || null;
         body.apiKey = body.apiKey || null;
 
-        module.exports.connectBot(JSON.stringify({ body: JSON.stringify(body) }), response);
-    },
-
-    connectBot: (message, response) => {
-        const directLineClient = directline.createClient();
-        directLineClient
-            .then((client) => {
-                client.Conversations.Conversations_StartConversation()
-                    .then((response) => response.obj.conversationId)
-                    .then((conversationId) => {
-                        directline.sendMessagesFromDashbot(client, conversationId, message);
-                        directline.pollMessages(client, conversationId);
-                    });
-            })
-            .then(() => response.end());
-    },
+        directline.connectBot(JSON.stringify({ body: JSON.stringify(body) }), response);
+    }
 };
