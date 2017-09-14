@@ -43,7 +43,7 @@ module.exports = {
     },
 
     logIncommingMessage(activity) {
-        console.log(JSON.stringify(activity ? activity : {}));
+        console.log('recibiendo: ' + JSON.stringify(activity ? activity : {}));
         dashbot.logIncoming({
             text: JSON.stringify(activity ? activity : {}),
             timestamp: Date.now()
@@ -65,14 +65,13 @@ module.exports = {
                 }
             })
             .then(() => { 
-                console.log(message);
+                console.log(`enviando: ${message}`);
                 dashbot.logOutgoing({ text: message, timestamp: Date.now() });
              })
             .catch((err) => console.error('Error sending message:', err));
     },
 
     pollMessages(client, conversationId) {
-        console.log('Ya estás conectado con el Bot');
         var watermark = null;
         setInterval(() => {
             client.Conversations
