@@ -2,7 +2,6 @@
 
 const Swagger = require('swagger-client');
 const rp = require('request-promise');
-const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 1800 });
 
 require('dotenv').config();
