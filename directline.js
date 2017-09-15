@@ -26,7 +26,7 @@ module.exports = {
     },
 
     sendMessagesFromDashbot(client, conversationId, body) {
-        message = JSON.stringify({ body: JSON.stringify(body) });
+        const message = JSON.stringify({ body: JSON.stringify(body) });
         client.Conversations
             .Conversations_PostActivity({
                 conversationId: conversationId,
