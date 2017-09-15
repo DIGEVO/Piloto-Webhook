@@ -42,7 +42,7 @@ module.exports = {
             })
             .then(() => {
                 dashbot.logOutgoing({
-                    "text": body.text || '',
+                    "text": body.text || body.paused ? 'Paused Bot' : 'Empty message',
                     "userId": process.env.CLIENT,
                     "conversationId": process.env.CLIENT,
                     "platformJson": {
@@ -92,7 +92,7 @@ module.exports = {
             .reduce((acc, a) => acc.concat(module.exports.getActivityText(a)), '');
 
         dashbot.logIncoming({
-            "text": status,
+            "text": status || 'Empty message',
             "userId": process.env.CLIENT,
             "conversationId": process.env.CLIENT,
             "platformJson": {
