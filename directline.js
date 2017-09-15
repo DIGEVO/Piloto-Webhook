@@ -44,7 +44,7 @@ module.exports = {
                 dashbot.logOutgoing({
                     "text": module.exports.getTextFromBody(body),
                     "userId": body.userId || process.env.CLIENT,
-                    "conversationId": body.conversationId ||process.env.CLIENT,
+                    "conversationId": body.conversationId || body.userId || process.env.CLIENT,
                     "platformJson": {
                         "message": message,
                         "client": process.env.CLIENT,
@@ -88,7 +88,7 @@ module.exports = {
         dashbot.logIncoming({
             "text": status || 'Empty message',
             "userId": message.userId || process.env.CLIENT,
-            "conversationId": message.conversationId || process.env.CLIENT,
+            "conversationId": message.conversationId || message.userId || process.env.CLIENT,
             "platformJson": {
                 "message": message,
                 "client": process.env.CLIENT,
