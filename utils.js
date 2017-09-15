@@ -20,7 +20,7 @@ module.exports = {
                 .on('data', (chunk) => body.push(chunk))
                 .on('end', () => { module.exports.handleResponse(Buffer.concat(body).toString(), response) });
         } else {
-            response.statusCode = 404;
+            response.statusCode = 200;
             response.end();
         }
     },
@@ -29,7 +29,7 @@ module.exports = {
         const body = JSON.parse(strBody === '' ? '{}' : strBody);
 
         response.on('error', module.exports.handleError);
-        response.writeHead(200, { 'Content-Type': 'application/json' });
+        //response.writeHead(200, { 'Content-Type': 'application/json' });
 
         body.paused = body.paused || false;
         body.userId = body.userId || null;
@@ -39,6 +39,7 @@ module.exports = {
 
         directline.connectBot(JSON.stringify({ body: JSON.stringify(body) }), response);
 
+        response.statusCode = 200;
         response.end();
     }
 };
