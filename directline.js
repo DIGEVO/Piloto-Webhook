@@ -5,15 +5,7 @@ const rp = require('request-promise');
 
 require('dotenv').config();
 
-const dashbotApiMap = {
-    'facebook': process.env.DASHBOT_API_KEY_GENERIC,
-    'webchat': process.env.DASHBOT_API_KEY_GENERIC,
-    'skype': process.env.DASHBOT_API_KEY_GENERIC,
-    'emulator': process.env.DASHBOT_API_KEY_GENERIC,
-    'DashbotChannel': process.env.DASHBOT_API_KEY_GENERIC
-};
-
-const dashbot = require('dashbot')(dashbotApiMap).generic;
+const dashbot = require('dashbot')(process.env.DASHBOT_API_KEY_GENERIC).generic;
 
 var watermark = null;
 module.exports = {
@@ -33,7 +25,8 @@ module.exports = {
             .catch((err) => console.error('Error initializing DirectLine client', err));
     },
 
-    sendMessagesFromDashbot(client, conversationId, message) {
+    sendMessagesFromDashbot(client, conversationId, body) {
+        message = JSON.stringify({ body: JSON.stringify(body) });
         client.Conversations
             .Conversations_PostActivity({
                 conversationId: conversationId,
@@ -49,7 +42,12 @@ module.exports = {
             })
             .then(() => {
                 console.log(`enviando: ${message}`);
-                dashbot.logOutgoing({ text: message, timestamp: Date.now() });
+                dashbot.logOutgoing({
+                    "text": message,
+                    "userId": process.env.CLIENT,
+                    "conversationId": process.env.CLIENT,
+                    "platformJson": {}
+                });
             })
             .catch((err) => console.error('Error sending message:', err));
     },
@@ -73,10 +71,10 @@ module.exports = {
         const result = await directLineClient.Conversations.Conversations_StartConversation();
         const conversationId = result.obj.conversationId;
         await module.exports.sendMessagesFromDashbot(directLineClient, conversationId, message);
-        await module.exports.logIncommingMessage(directLineClient, conversationId);
+        await module.exports.logIncommingMessage(directLineClient, conversationId, message);
     },
 
-    logIncommingMessage: async (directLineClient, conversationId) => {
+    logIncommingMessage: async (directLineClient, conversationId, message) => {
         let activitiesResponse;
         while (!activitiesResponse
             || !activitiesResponse.obj.activities
@@ -92,8 +90,10 @@ module.exports = {
 
         console.log(`recibiendo: ${status}`);
         dashbot.logIncoming({
-            text: status,
-            timestamp: Date.now()
+            "text": status,
+            "userId": process.env.CLIENT,
+            "conversationId": process.env.CLIENT,
+            "platformJson": {}
         });
     },
 
