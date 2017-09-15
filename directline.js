@@ -42,7 +42,7 @@ module.exports = {
             })
             .then(() => {
                 dashbot.logOutgoing({
-                    "text": getTextFromBody(body),
+                    "text": module.exports.getTextFromBody(body),
                     "userId": process.env.CLIENT,
                     "conversationId": process.env.CLIENT,
                     "platformJson": {
