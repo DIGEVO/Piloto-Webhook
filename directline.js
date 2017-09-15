@@ -47,7 +47,7 @@ module.exports = {
                     "conversationId": process.env.CLIENT,
                     "platformJson": {
                         "message": message,
-                        "client": JSON.stringify(client),
+                        "client": '',
                         "conversationId": conversationId
                     }
                 });
@@ -97,7 +97,7 @@ module.exports = {
             "conversationId": process.env.CLIENT,
             "platformJson": {
                 "message": message,
-                "client": JSON.stringify(directLineClient),
+                "client": '',
                 "conversationId": conversationId
             }
         });
