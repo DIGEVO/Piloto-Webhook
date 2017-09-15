@@ -43,11 +43,11 @@ module.exports = {
             .then(() => {
                 dashbot.logOutgoing({
                     "text": module.exports.getTextFromBody(body),
-                    "userId": process.env.CLIENT,
-                    "conversationId": process.env.CLIENT,
+                    "userId": body.userId || process.env.CLIENT,
+                    "conversationId": body.conversationId ||process.env.CLIENT,
                     "platformJson": {
                         "message": message,
-                        "client": '',
+                        "client": process.env.CLIENT,
                         "conversationId": conversationId
                     }
                 });
@@ -61,20 +61,6 @@ module.exports = {
         const pauseMsg = body.paused ? 'Paused Bot' : 'Unpaused Bot';
 
         return body.url === '/pause' ? pauseMsg : text;
-    },
-
-    pollMessages(client, conversationId) {
-        var watermark = null;
-        setInterval(() => {
-            client.Conversations
-                .Conversations_GetActivities({ conversationId: conversationId, watermark: watermark })
-                .then((response) => {
-                    watermark = response.obj.watermark;
-                    return response.obj.activities;
-                })
-                .then(module.exports.printMessages)
-                .catch((error) => console.error(error));
-        }, process.env.INTERVAL);
     },
 
     connectBot: async (message) => {
@@ -101,11 +87,11 @@ module.exports = {
 
         dashbot.logIncoming({
             "text": status || 'Empty message',
-            "userId": process.env.CLIENT,
-            "conversationId": process.env.CLIENT,
+            "userId": message.userId || process.env.CLIENT,
+            "conversationId": message.conversationId || process.env.CLIENT,
             "platformJson": {
                 "message": message,
-                "client": '',
+                "client": process.env.CLIENT,
                 "conversationId": conversationId
             }
         });
