@@ -36,7 +36,6 @@ module.exports = {
         body.text = body.text || null;
         body.apiKey = body.apiKey || null;
 
-        //directline.connectBot(JSON.stringify({ body: JSON.stringify(body) }));
         directline.connectBot(body);
 
         response.statusCode = 200;

@@ -41,12 +41,15 @@ module.exports = {
                 }
             })
             .then(() => {
-                console.log(`enviando: ${message}`);
                 dashbot.logOutgoing({
-                    "text": message,
+                    "text": body.text || '',
                     "userId": process.env.CLIENT,
                     "conversationId": process.env.CLIENT,
-                    "platformJson": {}
+                    "platformJson": {
+                        "message": message,
+                        "client": JSON.stringify(client),
+                        "conversationId": conversationId
+                    }
                 });
             })
             .catch((err) => console.error('Error sending message:', err));
@@ -88,12 +91,15 @@ module.exports = {
             .filter(m => m.from.id !== process.env.CLIENT)
             .reduce((acc, a) => acc.concat(module.exports.getActivityText(a)), '');
 
-        console.log(`recibiendo: ${status}`);
         dashbot.logIncoming({
             "text": status,
             "userId": process.env.CLIENT,
             "conversationId": process.env.CLIENT,
-            "platformJson": {}
+            "platformJson": {
+                "message": message,
+                "client": JSON.stringify(directLineClient),
+                "conversationId": conversationId
+            }
         });
     },
 
