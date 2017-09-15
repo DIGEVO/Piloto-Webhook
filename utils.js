@@ -29,7 +29,6 @@ module.exports = {
         const body = JSON.parse(strBody === '' ? '{}' : strBody);
 
         response.on('error', module.exports.handleError);
-        //response.writeHead(200, { 'Content-Type': 'application/json' });
 
         body.paused = body.paused || false;
         body.userId = body.userId || null;
@@ -37,7 +36,7 @@ module.exports = {
         body.text = body.text || null;
         body.apiKey = body.apiKey || null;
 
-        directline.connectBot(JSON.stringify({ body: JSON.stringify(body) }), response);
+        directline.connectBot(JSON.stringify({ body: JSON.stringify(body) }));
 
         response.statusCode = 200;
         response.end();

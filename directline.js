@@ -10,6 +10,7 @@ const dashbotApiMap = {
     'webchat': process.env.DASHBOT_API_KEY_GENERIC,
     'skype': process.env.DASHBOT_API_KEY_GENERIC,
     'emulator': process.env.DASHBOT_API_KEY_GENERIC,
+    'DashbotChannel': process.env.DASHBOT_API_KEY_GENERIC
 };
 
 const dashbot = require('dashbot')(dashbotApiMap).generic;
@@ -67,13 +68,12 @@ module.exports = {
         }, process.env.INTERVAL);
     },
 
-    connectBot: async (message, response) => {
+    connectBot: async (message) => {
         const directLineClient = await module.exports.createClient();
         const result = await directLineClient.Conversations.Conversations_StartConversation();
         const conversationId = result.obj.conversationId;
         await module.exports.sendMessagesFromDashbot(directLineClient, conversationId, message);
         await module.exports.logIncommingMessage(directLineClient, conversationId);
-        //response.end();
     },
 
     logIncommingMessage: async (directLineClient, conversationId) => {
