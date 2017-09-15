@@ -42,7 +42,7 @@ module.exports = {
             })
             .then(() => {
                 dashbot.logOutgoing({
-                    "text": body.text || body.paused ? 'Paused Bot' : 'Empty message',
+                    "text": getTextFromBody(body),
                     "userId": process.env.CLIENT,
                     "conversationId": process.env.CLIENT,
                     "platformJson": {
@@ -53,6 +53,14 @@ module.exports = {
                 });
             })
             .catch((err) => console.error('Error sending message:', err));
+    },
+
+    getTextFromBody: (body) => {
+        let text = body.text || '';
+        text = text.trim() || 'Empty message';
+        const pauseMsg = body.paused ? 'Paused Bot' : 'Unpaused Bot';
+
+        return body.url === '/pause' ? pauseMsg : text;
     },
 
     pollMessages(client, conversationId) {

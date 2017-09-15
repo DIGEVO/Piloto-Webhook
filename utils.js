@@ -18,14 +18,14 @@ module.exports = {
             request
                 .on('error', module.exports.handleError)
                 .on('data', (chunk) => body.push(chunk))
-                .on('end', () => { module.exports.handleResponse(Buffer.concat(body).toString(), response) });
+                .on('end', () => module.exports.handleResponse(Buffer.concat(body).toString(), response, url));
         } else {
             response.statusCode = 200;
             response.end();
         }
     },
 
-    handleResponse: (strBody, response) => {
+    handleResponse: (strBody, response, url) => {
         const body = JSON.parse(strBody === '' ? '{}' : strBody);
 
         response.on('error', module.exports.handleError);
@@ -35,6 +35,7 @@ module.exports = {
         body.conversationId = body.conversationId || null;
         body.text = body.text || null;
         body.apiKey = body.apiKey || null;
+        body.url = url;
 
         directline.connectBot(body);
 
