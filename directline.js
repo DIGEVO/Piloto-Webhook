@@ -2,22 +2,17 @@
 
 const Swagger = require('swagger-client');
 const rp = require('request-promise');
+const dashbotwrap = require('./dashbotwrapper');
 
 require('dotenv').config();
 
-const dashbot = require('dashbot')(process.env.DASHBOT_API_KEY_GENERIC).generic;
-
 var watermark = null;
 module.exports = {
+
     createClient: () => {
         return rp(process.env.SPEC)
-            .then((spec) => {
-                return new Swagger({
-                    spec: JSON.parse(spec.trim()),
-                    usePromise: true
-                });
-            })
-            .then((client) => {
+            .then(spec => new Swagger({ spec: JSON.parse(spec.trim()), usePromise: true }))
+            .then(client => {
                 client.clientAuthorizations.add('AuthorizationBotConnector',
                     new Swagger.ApiKeyAuthorization('Authorization', 'Bearer ' + process.env.SECRET, 'header'));
                 return client;
@@ -28,31 +23,41 @@ module.exports = {
     sendMessagesFromDashbot(client, conversationId, body) {
         const message = JSON.stringify({ body: JSON.stringify(body) });
         client.Conversations
-            .Conversations_PostActivity({
-                conversationId: conversationId,
-                activity: {
-                    textFormat: 'plain',
-                    text: message,
-                    type: 'message',
-                    from: {
-                        id: process.env.CLIENT,
-                        name: process.env.CLIENT
-                    }
-                }
-            })
-            .then(() => {
-                dashbot.logOutgoing({
-                    "text": module.exports.getTextFromBody(body),
-                    "userId": body.userId || process.env.CLIENT,
-                    "conversationId": body.conversationId || body.userId || process.env.CLIENT,
-                    "platformJson": {
-                        "message": message,
-                        "client": process.env.CLIENT,
-                        "conversationId": conversationId
-                    }
-                });
-            })
+            .Conversations_PostActivity(module.exports.postActivity(conversationId, message))
+            .then(() => dashbotwrap.logMessage(module.exports.getTextFromBody(body), body, conversationId, false))
             .catch((err) => console.error('Error sending message:', err));
+    },
+
+    receiveMessageFromBot: async (directLineClient, conversationId, message) => {
+        let activitiesResponse;
+        while (!activitiesResponse
+            || !activitiesResponse.obj.activities
+            || !activitiesResponse.obj.activities.length
+            || !activitiesResponse.obj.activities.some(m => m.from.id !== process.env.CLIENT)) {
+            activitiesResponse = await directLineClient.Conversations
+                .Conversations_GetActivities({ conversationId: conversationId, watermark: watermark });
+        }
+
+        const status = activitiesResponse.obj.activities
+            .filter(m => m.from.id !== process.env.CLIENT)
+            .reduce((acc, a) => acc.concat(module.exports.getActivityText(a)), '');
+
+        dashbotwrap.logMessage(status || 'Empty message', message, conversationId);
+    },
+
+    postActivity(conversationId, message) {
+        return {
+            conversationId: conversationId,
+            activity: {
+                textFormat: 'plain',
+                text: message,
+                type: 'message',
+                from: {
+                    id: process.env.CLIENT,
+                    name: process.env.CLIENT
+                }
+            }
+        };
     },
 
     getTextFromBody: (body) => {
@@ -68,33 +73,7 @@ module.exports = {
         const result = await directLineClient.Conversations.Conversations_StartConversation();
         const conversationId = result.obj.conversationId;
         await module.exports.sendMessagesFromDashbot(directLineClient, conversationId, message);
-        await module.exports.logIncommingMessage(directLineClient, conversationId, message);
-    },
-
-    logIncommingMessage: async (directLineClient, conversationId, message) => {
-        let activitiesResponse;
-        while (!activitiesResponse
-            || !activitiesResponse.obj.activities
-            || !activitiesResponse.obj.activities.length
-            || !activitiesResponse.obj.activities.some(m => m.from.id !== process.env.CLIENT)) {
-            activitiesResponse = await directLineClient.Conversations
-                .Conversations_GetActivities({ conversationId: conversationId, watermark: watermark });
-        }
-
-        const status = activitiesResponse.obj.activities
-            .filter(m => m.from.id !== process.env.CLIENT)
-            .reduce((acc, a) => acc.concat(module.exports.getActivityText(a)), '');
-
-        dashbot.logIncoming({
-            "text": status || 'Empty message',
-            "userId": message.userId || process.env.CLIENT,
-            "conversationId": message.conversationId || message.userId || process.env.CLIENT,
-            "platformJson": {
-                "message": message,
-                "client": process.env.CLIENT,
-                "conversationId": conversationId
-            }
-        });
+        await module.exports.receiveMessageFromBot(directLineClient, conversationId, message);
     },
 
     getActivityText: (activity) => activity.text ? `${activity.text}\n` : ''
