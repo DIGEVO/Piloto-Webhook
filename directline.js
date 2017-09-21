@@ -20,8 +20,16 @@ module.exports = {
             .catch((err) => console.error('Error initializing DirectLine client', err));
     },
 
+    connectBot: async (message) => {
+        const directLineClient = await module.exports.createClient();
+        const result = await directLineClient.Conversations.Conversations_StartConversation();
+        const conversationId = result.obj.conversationId;
+        await module.exports.sendMessagesFromDashbot(directLineClient, conversationId, message);
+        await module.exports.receiveMessageFromBot(directLineClient, conversationId, message);
+    },
+
     sendMessagesFromDashbot(client, conversationId, body) {
-        const message = JSON.stringify({ body: JSON.stringify(body) });
+        const message = JSON.stringify(body);
         client.Conversations
             .Conversations_PostActivity(module.exports.postActivity(conversationId, message))
             .then(() => dashbotwrap.logMessage(module.exports.getTextFromBody(body), body, conversationId, false))
@@ -66,14 +74,6 @@ module.exports = {
         const pauseMsg = body.paused ? 'Paused Bot' : 'Unpaused Bot';
 
         return body.url === '/pause' ? pauseMsg : text;
-    },
-
-    connectBot: async (message) => {
-        const directLineClient = await module.exports.createClient();
-        const result = await directLineClient.Conversations.Conversations_StartConversation();
-        const conversationId = result.obj.conversationId;
-        await module.exports.sendMessagesFromDashbot(directLineClient, conversationId, message);
-        await module.exports.receiveMessageFromBot(directLineClient, conversationId, message);
     },
 
     getActivityText: (activity) => activity.text ? `${activity.text}\n` : ''
