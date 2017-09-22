@@ -30,7 +30,7 @@ module.exports = {
 
         response.on('error', module.exports.handleError);
 
-        body.paused = body.paused || true;
+        body.paused = typeof body.paused === 'undefined' ? true : body.paused;
         body.userId = body.userId || null;
         body.conversationId = body.conversationId || null;
         body.text = body.text || null;
