@@ -32,7 +32,7 @@ module.exports = {
         const message = JSON.stringify(body);
         client.Conversations
             .Conversations_PostActivity(module.exports.postActivity(conversationId, message))
-            .then(() => dashbotwrap.logMessage(module.exports.getTextFromBody(body), body, conversationId, false))
+            //.then(() => dashbotwrap.logMessage(module.exports.getTextFromBody(body), body, conversationId, false))
             .catch((err) => console.error('Error sending message:', err));
     },
 
